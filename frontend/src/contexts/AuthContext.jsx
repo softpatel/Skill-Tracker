@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api, setAuthToken, getAuthToken, removeAuthToken } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -15,25 +16,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Check for stored auth token and validate
-    const checkAuth = async () => {
+    // Check for stored token on mount
+    const token = getAuthToken();
+    if (token) {
+      // TODO: Implement token validation endpoint
+      // For now, just get user data from stored token
       try {
-        // TODO: Implement token validation
-        setLoading(false);
+        const tokenData = JSON.parse(atob(token.split('.')[1]));
+        setUser({
+          id: tokenData.userId,
+          // Other user data would come from an API call
+        });
       } catch (error) {
-        console.error('Auth check failed:', error);
-        setLoading(false);
+        console.error('Token validation failed:', error);
+        removeAuthToken();
       }
-    };
-
-    checkAuth();
+    }
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
-      // TODO: Implement login logic
-      // const response = await api.login(email, password);
-      // setUser(response.user);
+      const response = await api.auth.login(email, password);
+      setAuthToken(response.token);
+      setUser(response.user);
       return true;
     } catch (error) {
       console.error('Login failed:', error);
@@ -43,9 +49,9 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (email, password, name) => {
     try {
-      // TODO: Implement signup logic
-      // const response = await api.signup(email, password, name);
-      // setUser(response.user);
+      const response = await api.auth.signup(email, password, name);
+      setAuthToken(response.token);
+      setUser(response.user);
       return true;
     } catch (error) {
       console.error('Signup failed:', error);
@@ -53,16 +59,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      // TODO: Implement logout logic
-      setUser(null);
-      // Clear stored tokens
-      return true;
-    } catch (error) {
-      console.error('Logout failed:', error);
-      throw error;
-    }
+  const logout = () => {
+    removeAuthToken();
+    setUser(null);
   };
 
   const value = {
