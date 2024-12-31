@@ -86,6 +86,26 @@ export const api = {
       return response.json();
     },
 
+    uploadProfileImage: async (file) => {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const response = await fetch(`${API_URL}/users/profile/image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': getAuthToken() ? `Bearer ${getAuthToken()}` : '',
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload profile image');
+      }
+
+      return response.json();
+    },
+
     getAchievements: async () => {
       const response = await fetch(`${API_URL}/users/achievements`, {
         headers: getHeaders(),
