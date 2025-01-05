@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import CreateSkill from './pages/CreateSkill';
+import SkillDetail from './pages/SkillDetail';
 import Profile from './pages/Profile';
 import Auth from './pages/Auth';
 import { AuthProvider } from './contexts/AuthContext';
@@ -18,6 +19,7 @@ const App = () => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/create-skill" element={<CreateSkill />} />
+              <Route path="/skill/:skillId" element={<SkillDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/auth" element={<Auth />} />
             </Routes>

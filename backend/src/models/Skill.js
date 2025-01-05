@@ -14,9 +14,19 @@ const skillSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  targetDate: {
-    type: Date,
-    required: true
+  currentLevel: {
+    type: String,
+    enum: ['Beginner', 'Intermediate', 'Advanced'],
+    default: 'Beginner'
+  },
+  targetLevel: {
+    type: String,
+    enum: ['Intermediate', 'Advanced', 'Expert'],
+    default: 'Intermediate'
+  },
+  timeCommitment: {
+    type: Number,
+    default: 0
   },
   progress: {
     type: Number,
@@ -28,16 +38,18 @@ const skillSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  milestones: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Milestone'
+  }],
   status: {
     type: String,
     enum: ['in-progress', 'completed'],
     default: 'in-progress'
-  },
-  milestones: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Milestone'
-  }]
-}, { timestamps: true });
+  }
+}, { 
+  timestamps: true 
+});
 
 const Skill = mongoose.model('Skill', skillSchema);
 module.exports = Skill;

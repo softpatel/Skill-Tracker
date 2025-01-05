@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useReducer } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 const SkillContext = createContext();
 
@@ -10,83 +11,64 @@ export const useSkills = () => {
   return context;
 };
 
-// Define action types
-const ACTIONS = {
-  SET_SKILLS: 'SET_SKILLS',
-  ADD_SKILL: 'ADD_SKILL',
-  UPDATE_SKILL: 'UPDATE_SKILL',
-  DELETE_SKILL: 'DELETE_SKILL',
-  SET_LOADING: 'SET_LOADING',
-  SET_ERROR: 'SET_ERROR'
-};
-
-const skillReducer = (state, action) => {
-  switch (action.type) {
-    case ACTIONS.SET_SKILLS:
-      return { ...state, skills: action.payload, loading: false };
-    case ACTIONS.ADD_SKILL:
-      return { ...state, skills: [...state.skills, action.payload] };
-    case ACTIONS.UPDATE_SKILL:
-      return {
-        ...state,
-        skills: state.skills.map(skill =>
-          skill.id === action.payload.id ? action.payload : skill
-        )
-      };
-    case ACTIONS.DELETE_SKILL:
-      return {
-        ...state,
-        skills: state.skills.filter(skill => skill.id !== action.payload)
-      };
-    case ACTIONS.SET_LOADING:
-      return { ...state, loading: action.payload };
-    case ACTIONS.SET_ERROR:
-      return { ...state, error: action.payload };
-    default:
-      return state;
-  }
-};
-
 export const SkillProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(skillReducer, {
-    skills: [],
-    loading: false,
-    error: null
-  });
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchSkills();
+  }, []);
+
+  const fetchSkills = async () => {
+    try {
+      const data = await api.skills.getAll();
+      setSkills(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const createSkill = async (skillData) => {
     try {
-      dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-      // TODO: Implement API call to create skill
-      // const response = await api.createSkill(skillData);
-      // dispatch({ type: ACTIONS.ADD_SKILL, payload: response.data });
-    } catch (error) {
-      dispatch({ type: ACTIONS.SET_ERROR, payload: error.message });
-    } finally {
-      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+      const newSkill = await api.skills.create(skillData);
+      setSkills(prevSkills => [...prevSkills, newSkill]);
+      return newSkill;
+    } catch (err) {
+      setError(err.message);
+      throw err;
     }
   };
 
   const updateSkillProgress = async (skillId, progressData) => {
     try {
-      dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-      // TODO: Implement API call to update progress
-      // const response = await api.updateSkillProgress(skillId, progressData);
-      // dispatch({ type: ACTIONS.UPDATE_SKILL, payload: response.data });
-    } catch (error) {
-      dispatch({ type: ACTIONS.SET_ERROR, payload: error.message });
-    } finally {
-      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+      const updatedSkill = await api.skills.updateProgress(skillId, progressData);
+      setSkills(prevSkills =>
+        prevSkills.map(skill =>
+          skill._id === skillId ? updatedSkill : skill
+        )
+      );
+      return updatedSkill;
+    } catch (err) {
+      setError(err.message);
+      throw err;
     }
   };
 
   const value = {
-    skills: state.skills,
-    loading: state.loading,
-    error: state.error,
+    skills,
+    loading,
+    error,
     createSkill,
-    updateSkillProgress
+    updateSkillProgress,
+    refreshSkills: fetchSkills
   };
 
-  return <SkillContext.Provider value={value}>{children}</SkillContext.Provider>;
+  return (
+    <SkillContext.Provider value={value}>
+      {children}
+    </SkillContext.Provider>
+  );
 };

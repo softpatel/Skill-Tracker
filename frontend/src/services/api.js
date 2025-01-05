@@ -119,4 +119,77 @@ export const api = {
       return response.json();
     },
   },
+
+  skills: {
+    create: async (skillData) => {      
+      const response = await fetch(`${API_URL}/skills`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(skillData),
+      });
+    
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create skill');
+      }
+
+      return response.json();
+    },
+
+    generatePlan: async (skillData) => {
+      const response = await fetch(`${API_URL}/skills/generate-plan`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(skillData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate skill plan');
+      }
+
+      return response.json();
+    },
+
+    updateProgress: async (skillId, progressData) => {
+      const response = await fetch(`${API_URL}/skills/${skillId}/progress`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(progressData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update progress');
+      }
+
+      return response.json();
+    },
+
+    getAll: async () => {
+      const response = await fetch(`${API_URL}/skills`, {
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch skills');
+      }
+
+      return response.json();
+    },
+
+    getById: async (skillId) => {
+      const response = await fetch(`${API_URL}/skills/${skillId}`, {
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch skill');
+      }
+
+      return response.json();
+    }
+  }
 };

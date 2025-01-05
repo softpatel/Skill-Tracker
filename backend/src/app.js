@@ -5,6 +5,7 @@ const path = require('path');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const skillRoutes = require('./routes/skills');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/skills', skillRoutes);
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => {

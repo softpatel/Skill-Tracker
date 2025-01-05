@@ -25,7 +25,7 @@ Skill Tracker is a web application that helps users develop new skills through A
 - Express.js
 - MongoDB with Mongoose
 - JWT for authentication
-- OpenAI API for plan generation
+- Anthropic API for plan generation
 
 ## Prerequisites
 
@@ -59,7 +59,7 @@ npm install
 PORT=5005
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-OPENAI_API_KEY=your_openai_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
 5. Start the development servers:
