@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import CreateSkill from './pages/CreateSkill';
 import SkillDetail from './pages/SkillDetail';
@@ -16,12 +17,53 @@ const App = () => {
         <BrowserRouter>
           <Layout>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/create-skill" element={<CreateSkill />} />
-              <Route path="/skill/:skillId" element={<SkillDetail />} />
-              <Route path="/profile" element={<Profile />} />
+              {/* Public routes */}
               <Route path="/auth" element={<Auth />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-skill"
+                element={
+                  <ProtectedRoute>
+                    <CreateSkill />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/skill/:skillId"
+                element={
+                  <ProtectedRoute>
+                    <SkillDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
         </BrowserRouter>

@@ -106,7 +106,7 @@ exports.createSkill = async (req, res) => {
 
 exports.getAllSkills = async (req, res) => {
   try {
-    const skills = await Skill.find({ userId: req.user._id });
+    const skills = await Skill.find({ user: req.user._id });
     res.json(skills);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching skills' });
@@ -129,6 +129,30 @@ exports.getSkill = async (req, res) => {
   }
 };
 
+exports.deleteSkill = async (req, res) => {
+  try {
+    // Find the skill and ensure it belongs to the user
+    const skill = await Skill.findOne({ 
+      _id: req.params.id, 
+      user: req.user._id 
+    });
+
+    if (!skill) {
+      return res.status(404).json({ error: 'Skill not found' });
+    }
+
+    // Delete associated milestones
+    await Milestone.deleteMany({ skill: skill._id });
+
+    // Delete the skill
+    await skill.deleteOne();
+
+    res.json({ message: 'Skill deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting skill' });
+  }
+};
+
 exports.updateProgress = async (req, res) => {
   try {
     const skill = await Skill.findOneAndUpdate(
@@ -142,5 +166,51 @@ exports.updateProgress = async (req, res) => {
     res.json(skill);
   } catch (error) {
     res.status(500).json({ error: 'Error updating progress' });
+  }
+};
+
+exports.updateMilestone = async (req, res) => {
+  try {
+    const { milestoneId } = req.params;
+    const updates = req.body;
+
+    // Find the milestone and populate the skill reference
+    const milestone = await Milestone.findById(milestoneId).populate('skill');
+
+    if (!milestone) {
+      return res.status(404).json({ error: 'Milestone not found' });
+    }
+
+    // Verify that the milestone belongs to a skill owned by the user
+    if (milestone.skill.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized to update this milestone' });
+    }
+
+    // Update the milestone
+    Object.keys(updates).forEach(key => {
+      milestone[key] = updates[key];
+    });
+
+    await milestone.save();
+
+    // If milestone is marked as completed, check if all milestones are completed
+    // and update the skill progress accordingly
+    if (updates.completed !== undefined) {
+      const skill = await Skill.findById(milestone.skill._id);
+      const allMilestones = await Milestone.find({ skill: skill._id });
+      const completedCount = allMilestones.filter(m => m.completed).length;
+      const progress = Math.round((completedCount / allMilestones.length) * 100);
+      
+      skill.progress = progress;
+      if (progress === 100) {
+        skill.status = 'completed';
+      }
+      await skill.save();
+    }
+
+    res.json(milestone);
+  } catch (error) {
+    console.error('Error updating milestone:', error);
+    res.status(500).json({ error: 'Error updating milestone' });
   }
 };

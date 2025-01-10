@@ -31,6 +31,18 @@ export const SkillProvider = ({ children }) => {
     }
   };
 
+  const deleteSkill = async (skillId) => {
+    try {
+      await api.skills.delete(skillId);
+      // Update local state directly instead of re-fetching
+      setSkills(prevSkills => prevSkills.filter(skill => skill._id !== skillId));
+      return true;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
   const createSkill = async (skillData) => {
     try {
       const newSkill = await api.skills.create(skillData);
@@ -62,6 +74,7 @@ export const SkillProvider = ({ children }) => {
     loading,
     error,
     createSkill,
+    deleteSkill,
     updateSkillProgress,
     refreshSkills: fetchSkills
   };
