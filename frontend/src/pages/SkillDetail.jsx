@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import ProgressTracker from '../components/skills/ProgressTracker';
-import MilestoneList from '../components/dashboard/MilestoneList';
+import MilestoneList from '../components/skills/MilestoneList';
 import Loading from '../components/common/Loading';
 
 const SkillDetail = () => {
@@ -77,7 +77,7 @@ const SkillDetail = () => {
       </div>
 
       <ProgressTracker skillId={skillId} />
-      <MilestoneList milestones={skill.plan?.milestones || []} />
+      {skill.milestones && <MilestoneList milestones={skill.milestones} />}
     </div>
   );
 };

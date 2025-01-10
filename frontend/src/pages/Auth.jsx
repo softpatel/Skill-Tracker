@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { login, signup } = useAuth();
+  const location = useLocation();
+  const { login, signup, user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,14 @@ const Auth = () => {
     password: '',
     name: ''
   });
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,9 +36,9 @@ const Auth = () => {
       } else {
         await signup(formData.email, formData.password, formData.name);
       }
-      navigate('/dashboard');
+      // Navigation will be handled by the useEffect above
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -38,7 +47,7 @@ const Auth = () => {
   return (
     <div className="max-w-md mx-auto mt-8">
       <h1 className="text-3xl font-bold mb-6">
-        {isLogin ? 'Login' : 'Sign Up'}
+        {isLogin ? 'Welcome Back' : 'Create Account'}
       </h1>
       <div className="bg-white shadow rounded-lg p-6">
         <form onSubmit={handleSubmit} className="space-y-4">

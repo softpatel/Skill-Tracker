@@ -136,6 +136,20 @@ export const api = {
       return response.json();
     },
 
+    delete: async (skillId) => {
+      const response = await fetch(`${API_URL}/skills/${skillId}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete skill');
+      }
+
+      return response.json();
+    },
+
     generatePlan: async (skillData) => {
       const response = await fetch(`${API_URL}/skills/generate-plan`, {
         method: 'POST',
@@ -148,6 +162,21 @@ export const api = {
         throw new Error(error.error || 'Failed to generate skill plan');
       }
 
+      return response.json();
+    },
+
+    updateMilestone: async (milestoneId, data) => {
+      const response = await fetch(`${API_URL}/skills/milestones/${milestoneId}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+    
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update milestone');
+      }
+    
       return response.json();
     },
 

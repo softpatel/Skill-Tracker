@@ -9,9 +9,6 @@ const skillRoutes = require('./routes/skills');
 
 const app = express();
 
-// Connect to database
-connectDB();
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -25,6 +22,22 @@ app.use('/api/users', userRoutes);
 app.use('/api/skills', skillRoutes);
 
 const PORT = process.env.PORT || 5005;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+// Start server and connect to database
+const startServer = async () => {
+  try {
+    // First try to connect to database
+    console.log('Starting server...');
+    await connectDB();
+    
+    // Only start server if database connection is successful
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
