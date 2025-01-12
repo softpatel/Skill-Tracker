@@ -2,12 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const skillRoutes = require('./routes/skills');
 
 const app = express();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads', 'profile-images');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 // Middleware
 app.use(cors());
