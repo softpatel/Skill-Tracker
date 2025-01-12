@@ -18,13 +18,20 @@ const ProgressTracker = ({ skillId }) => {
 
     setLoading(true);
     try {
+      const duration = parseFloat(progressData.duration);
+      
+      // Validate duration
+      if (isNaN(duration) || duration <= 0) {
+        throw new Error('Please enter a valid duration');
+      }
+
       await updateSkillProgress(skillId, {
         date: new Date().toISOString(),
-        duration: parseFloat(progressData.duration),
-        notes: progressData.notes
+        duration: duration,
+        notes: progressData.notes || ''
       });
 
-      // Reset form
+      // Reset form and close logging panel
       setProgressData({ duration: '', notes: '' });
       setIsLogging(false);
     } catch (error) {

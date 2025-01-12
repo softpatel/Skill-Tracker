@@ -1,6 +1,7 @@
 const Skill = require('../models/Skill');
 const Milestone = require('../models/Milestone');
 const User = require('../models/User');
+const Progress = require('../models/Progress');
 const Anthropic = require('@anthropic-ai/sdk');
 
 const anthropic = new Anthropic({
@@ -155,16 +156,59 @@ exports.deleteSkill = async (req, res) => {
 
 exports.updateProgress = async (req, res) => {
   try {
-    const skill = await Skill.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user._id },
-      { $push: { progress: req.body } },
-      { new: true }
-    );
+    const { duration, notes, date } = req.body;
+    
+    // Validate input
+    if (!duration || duration <= 0) {
+      return res.status(400).json({ error: 'Invalid duration' });
+    }
+
+    // First find the skill
+    const skill = await Skill.findOne({ _id: req.params.id, user: req.user._id });
+    
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
     }
-    res.json(skill);
+
+    // Create new progress entry
+    const progress = new Progress({
+      skill: skill._id,
+      user: req.user._id,
+      duration,
+      notes,
+      date: date || new Date()
+    });
+
+    // Save the progress entry
+    await progress.save();
+
+    // Update skill with new progress
+    skill.timeSpent = (skill.timeSpent || 0) + duration;
+    
+    // Calculate progress based on time spent vs estimated time
+    const totalEstimatedHours = await Milestone.aggregate([
+      { $match: { skill: skill._id } },
+      { $group: { _id: null, total: { $sum: '$estimatedHours' } } }
+    ]);
+    
+    const estimatedTotal = totalEstimatedHours[0]?.total || 100; // fallback to 100 if no milestones
+    skill.progressPercentage = Math.min(Math.round((skill.timeSpent / estimatedTotal) * 100), 100);
+    
+    // Add the progress entry to the history
+    skill.progressHistory.push(progress._id);
+
+    // Save the skill updates
+    await skill.save();
+
+    // Return updated skill with the new progress entry
+    const updatedSkill = await Skill.findById(skill._id).populate({
+      path: 'progressHistory',
+      options: { sort: { date: -1 } }
+    });
+
+    res.json(updatedSkill);
   } catch (error) {
+    console.error('Progress update error:', error);
     res.status(500).json({ error: 'Error updating progress' });
   }
 };

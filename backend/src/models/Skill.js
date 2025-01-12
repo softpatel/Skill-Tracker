@@ -28,12 +28,18 @@ const skillSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  progress: {
+  // Keep the percentage completion as a number
+  progressPercentage: {
     type: Number,
     default: 0,
     min: 0,
     max: 100
   },
+  // Store progress history as references
+  progressHistory: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Progress'
+  }],
   timeSpent: {
     type: Number,
     default: 0
@@ -50,6 +56,9 @@ const skillSchema = new mongoose.Schema({
 }, { 
   timestamps: true 
 });
+
+// Add an index to improve query performance
+skillSchema.index({ user: 1, status: 1 });
 
 const Skill = mongoose.model('Skill', skillSchema);
 module.exports = Skill;

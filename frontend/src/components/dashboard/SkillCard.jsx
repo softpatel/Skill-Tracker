@@ -96,7 +96,7 @@ const SkillCard = ({ skill }) => {
         <div className="relative h-2 bg-gray-200 rounded">
           <div 
             className="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all duration-500" 
-            style={{ width: `${skill.progress || 0}%` }}
+            style={{ width: `${skill.progressPercentage || 0}%` }}
           />
         </div>
 
