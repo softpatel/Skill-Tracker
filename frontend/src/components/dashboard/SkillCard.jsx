@@ -22,13 +22,13 @@ const SkillCard = ({ skill }) => {
 
   if (!skill) {
     return (
-      <div className="bg-white shadow rounded-lg p-6 min-h-[200px] animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="bg-indigo-800/50 shadow-lg rounded-lg p-6 min-h-[200px] animate-pulse">
+        <div className="h-6 bg-indigo-700 rounded w-3/4 mb-4"></div>
         <div className="space-y-4">
-          <div className="h-2 bg-gray-200 rounded"></div>
+          <div className="h-2 bg-indigo-700 rounded"></div>
           <div className="flex justify-between">
-            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-indigo-700 rounded w-1/3"></div>
+            <div className="h-4 bg-indigo-700 rounded w-1/4"></div>
           </div>
         </div>
       </div>
@@ -36,11 +36,11 @@ const SkillCard = ({ skill }) => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow relative">
+    <div className="bg-indigo-800/50 shadow-lg rounded-lg p-6 hover:bg-indigo-800/70 transition-all relative border border-indigo-700/50">
       {/* Delete button */}
       <button
         onClick={() => setShowConfirmation(true)}
-        className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+        className="absolute top-4 right-4 text-indigo-300 hover:text-red-400 transition-colors"
         disabled={isDeleting}
       >
         <svg
@@ -61,15 +61,15 @@ const SkillCard = ({ skill }) => {
 
       {/* Confirmation Dialog */}
       {showConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-            <h3 className="text-lg font-medium mb-4">Delete Skill</h3>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 bg-indigo-950/80 flex items-center justify-center z-50">
+          <div className="bg-indigo-900 rounded-lg p-6 max-w-sm mx-4 border border-indigo-700">
+            <h3 className="text-lg font-medium mb-4 text-white">Delete Skill</h3>
+            <p className="text-indigo-200 mb-6">
               Are you sure you want to delete "{skill.title}"? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3">
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() => setShowConfirmation(false)}
                 disabled={isDeleting}
               >
@@ -79,6 +79,7 @@ const SkillCard = ({ skill }) => {
                 variant="primary"
                 onClick={handleDelete}
                 disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-500"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </Button>
@@ -88,36 +89,37 @@ const SkillCard = ({ skill }) => {
       )}
 
       <div className="mb-4">
-        <h3 className="text-xl font-semibold mb-2">{skill.title}</h3>
-        <p className="text-gray-600 text-sm line-clamp-2">{skill.description}</p>
+        <h3 className="text-xl font-semibold mb-2 text-white">{skill.title}</h3>
+        <p className="text-indigo-200 text-sm line-clamp-2">{skill.description}</p>
       </div>
 
       <div className="space-y-4">
-        <div className="relative h-2 bg-gray-200 rounded">
+        <div className="relative h-2 bg-indigo-700/50 rounded">
           <div 
-            className="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all duration-500" 
+            className="absolute top-0 left-0 h-full bg-indigo-500 rounded transition-all duration-500" 
             style={{ width: `${skill.progressPercentage || 0}%` }}
           />
         </div>
 
         <div className="flex justify-between text-sm">
-          <div className="text-gray-600">
-            <span className="font-medium">{skill.timeSpent || 0}</span> hours invested
+          <div className="text-indigo-200">
+            <span className="font-medium text-white">{skill.timeSpent || 0}</span> hours invested
           </div>
-          <div className="text-gray-600">
-            <span className="font-medium">{skill.progress || 0}%</span> complete
+          <div className="text-indigo-200">
+            <span className="font-medium text-white">{skill.progress || 0}%</span> complete
           </div>
         </div>
 
         <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-indigo-300">
             {skill.currentLevel} → {skill.targetLevel}
           </div>
           <Link 
             to={`/skill/${skill._id}`}
-            className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+            className="text-indigo-300 hover:text-indigo-200 text-sm font-medium flex items-center gap-1 group"
           >
-            View Details →
+            View Details 
+            <span className="transform transition-transform group-hover:translate-x-1">→</span>
           </Link>
         </div>
       </div>
