@@ -24,25 +24,25 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-400 mb-4">{error}</p>
         <Button onClick={refreshSkills}>Try Again</Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fadeIn">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Your Skills Dashboard</h1>
+        <h1 className="text-3xl font-bold text-white">Your Skills Dashboard</h1>
         <Link to="/create-skill">
           <Button>Add New Skill</Button>
         </Link>
       </div>
 
       {skills.length === 0 ? (
-        <div className="bg-white shadow rounded-lg p-8 text-center">
-          <h2 className="text-xl font-semibold mb-4">Welcome to Skill Tracker!</h2>
-          <p className="text-gray-600 mb-6">
+        <div className="bg-indigo-800/50 shadow-lg rounded-lg p-8 text-center border border-indigo-700/50">
+          <h2 className="text-xl font-semibold mb-4 text-white">Welcome to SkillTracker!</h2>
+          <p className="text-indigo-200 mb-6">
             Start your learning journey by adding your first skill. Our AI will help create
             a personalized learning plan for you.
           </p>
@@ -58,15 +58,12 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Only show these if there are skills */}
           {skills.length > 0 && (
-            <>
-              <ProgressChart 
-                timeEntries={skills.flatMap(skill => 
-                  skill.timeEntries || []
-                )}
-              />
-            </>
+            <ProgressChart 
+              timeEntries={skills.flatMap(skill => 
+                skill.timeEntries || []
+              )}
+            />
           )}
         </>
       )}

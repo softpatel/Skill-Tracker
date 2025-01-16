@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSkills } from '../../contexts/SkillContext';
 import { api } from '../../services/api';
 import Button from '../common/Button';
-import Input from '../common/Input';
 import Loading from '../common/Loading';
 
 const SkillForm = () => {
@@ -25,7 +24,6 @@ const SkillForm = () => {
     setError('');
 
     try {
-      // Generate AI plan first
       const plan = await api.skills.generatePlan(formData);      
       const skillData = { ...formData, plan };
       const skill = await createSkill(skillData);
@@ -37,24 +35,34 @@ const SkillForm = () => {
     }
   };
 
+  // Common input styles
+  const inputStyles = "mt-1 block w-full rounded-md bg-indigo-900/50 border border-indigo-500/50 text-white placeholder-indigo-400 hover:border-indigo-400/50 focus:ring-indigo-500 focus:border-indigo-500 transition-colors";
+  const labelStyles = "block text-sm font-medium text-indigo-200";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow rounded-lg p-6">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-indigo-800/50 shadow-lg rounded-lg p-6 border border-indigo-700/50">
       <div className="space-y-4">
-        <Input
-          label="Skill Title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          required
-          placeholder="e.g., Python Programming, Digital Photography"
-        />
+        <div>
+          <label className={labelStyles}>
+            Skill Title
+          </label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            placeholder="e.g., Python Programming, Digital Photography"
+            className={inputStyles}
+            required
+          />
+        </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <label className={labelStyles}>Description</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows="3"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className={inputStyles}
             placeholder="What do you want to achieve with this skill?"
             required
           />
@@ -62,11 +70,11 @@ const SkillForm = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Current Level</label>
+            <label className={labelStyles}>Current Level</label>
             <select
               value={formData.currentLevel}
               onChange={(e) => setFormData({ ...formData, currentLevel: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={inputStyles}
             >
               <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
@@ -75,11 +83,11 @@ const SkillForm = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Target Level</label>
+            <label className={labelStyles}>Target Level</label>
             <select
               value={formData.targetLevel}
               onChange={(e) => setFormData({ ...formData, targetLevel: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={inputStyles}
             >
               <option value="Intermediate">Intermediate</option>
               <option value="Advanced">Advanced</option>
@@ -88,25 +96,30 @@ const SkillForm = () => {
           </div>
         </div>
 
-        <Input
-          label="Weekly Time Commitment (hours)"
-          type="number"
-          min="1"
-          value={formData.timeCommitment}
-          onChange={(e) => setFormData({ ...formData, timeCommitment: e.target.value })}
-          required
-        />
+        <div>
+          <label className={labelStyles}>
+            Weekly Time Commitment (hours)
+          </label>
+          <input
+            type="number"
+            min="1"
+            value={formData.timeCommitment}
+            onChange={(e) => setFormData({ ...formData, timeCommitment: e.target.value })}
+            className={inputStyles}
+            required
+          />
+        </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg">
+        <div className="bg-red-900/50 text-red-200 p-4 rounded-lg border border-red-700">
           {error}
         </div>
       )}
 
       <div className="flex justify-end space-x-4">
         <Button
-          variant="secondary"
+          variant="outline"
           onClick={() => navigate('/dashboard')}
           type="button"
         >
@@ -116,7 +129,14 @@ const SkillForm = () => {
           type="submit"
           disabled={loading}
         >
-          {loading ? <Loading size="small" /> : 'Create Skill'}
+          {loading ? (
+            <div className="flex items-center space-x-2">
+              <Loading size="small" />
+              <span>Creating Skill...</span>
+            </div>
+          ) : (
+            'Create Skill'
+          )}
         </Button>
       </div>
     </form>

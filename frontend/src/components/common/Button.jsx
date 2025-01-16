@@ -8,12 +8,12 @@ const Button = ({
   className = '',
   ...props 
 }) => {
-  const baseStyles = 'rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const baseStyles = 'rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200';
   
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500'
+    primary: 'bg-indigo-600 text-white hover:bg-indigo-500 focus:ring-indigo-500',
+    secondary: 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300 focus:ring-indigo-400',
+    outline: 'border-2 border-indigo-300 text-indigo-100 hover:bg-indigo-800 focus:ring-indigo-400'
   };
 
   const sizes = {
