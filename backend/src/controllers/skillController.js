@@ -3,6 +3,7 @@ const Milestone = require('../models/Milestone');
 const User = require('../models/User');
 const Progress = require('../models/Progress');
 const Anthropic = require('@anthropic-ai/sdk');
+const AchievementService = require('../services/achievementService');
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -92,6 +93,9 @@ exports.createSkill = async (req, res) => {
       // Update skill with milestone references
       skill.milestones = savedMilestones.map(m => m._id);
       await skill.save();
+
+      // Check for skill-related achievements
+      const newAchievements = await AchievementService.checkSkillAchievements(req.user._id);
     }
     
     // Fetch the complete skill with populated milestones
@@ -182,6 +186,9 @@ exports.updateProgress = async (req, res) => {
     // Save the progress entry
     await progress.save();
 
+    // Check for progress-related achievements
+    const newAchievements = await AchievementService.checkProgressAchievements(req.user._id, skill._id);
+
     // Update skill with new progress
     skill.timeSpent = (skill.timeSpent || 0) + duration;
     
@@ -236,6 +243,9 @@ exports.updateMilestone = async (req, res) => {
     });
 
     await milestone.save();
+
+    // Check for milestone-related achievements
+    const newAchievements = await AchievementService.checkMilestoneAchievements(req.user._id, milestone._id);
 
     // If milestone is marked as completed, check if all milestones are completed
     // and update the skill progress accordingly
