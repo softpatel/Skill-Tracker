@@ -13,6 +13,16 @@ const Dashboard = () => {
     refreshSkills();
   }, [refreshSkills]);
 
+  // Combine progress history from all skills
+  const allProgressHistory = skills.flatMap(skill => 
+    skill.progressHistory || []
+  );
+
+  // Combine milestones from all skills
+  const allMilestones = skills.flatMap(skill => 
+    skill.milestones || []
+  );
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -41,7 +51,7 @@ const Dashboard = () => {
 
       {skills.length === 0 ? (
         <div className="bg-indigo-800/50 shadow-lg rounded-lg p-8 text-center border border-indigo-700/50">
-          <h2 className="text-xl font-semibold mb-4 text-white">Welcome to SkillTracker!</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Welcome to Skill Tracker!</h2>
           <p className="text-indigo-200 mb-6">
             Start your learning journey by adding your first skill. Our AI will help create
             a personalized learning plan for you.
@@ -58,11 +68,10 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {skills.length > 0 && (
+          {allProgressHistory.length > 0 && (
             <ProgressChart 
-              timeEntries={skills.flatMap(skill => 
-                skill.timeEntries || []
-              )}
+              progressHistory={allProgressHistory}
+              milestones={allMilestones}
             />
           )}
         </>

@@ -8,9 +8,9 @@ const MilestoneList = ({ milestones = [] }) => {
   );
 
   const handleToggleMilestone = async (milestoneId) => {
+    const isCompleting = !completedMilestones.has(milestoneId);
+    
     try {
-      const isCompleting = !completedMilestones.has(milestoneId);
-      
       // Optimistic update
       setCompletedMilestones(prev => {
         const next = new Set(prev);
@@ -28,10 +28,10 @@ const MilestoneList = ({ milestones = [] }) => {
       // Revert optimistic update on error
       setCompletedMilestones(prev => {
         const next = new Set(prev);
-        if (!isCompleting) {
-          next.add(milestoneId);
-        } else {
+        if (isCompleting) {
           next.delete(milestoneId);
+        } else {
+          next.add(milestoneId);
         }
         return next;
       });

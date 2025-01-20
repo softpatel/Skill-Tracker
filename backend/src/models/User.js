@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     default: ''  // URL to profile image
   },
   achievements: [{
+    id: {
+      type: String,
+      required: true
+    },
     type: {
       type: String,
       required: true
@@ -41,6 +45,10 @@ const userSchema = new mongoose.Schema({
       required: true
     },
     description: String,
+    emoji: {
+      type: String,
+      default: '🏆'
+    },
     dateEarned: {
       type: Date,
       default: Date.now
