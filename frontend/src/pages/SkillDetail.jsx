@@ -86,7 +86,7 @@ const SkillDetail = () => {
           <div className="mb-2">
             <div className="flex justify-between text-sm text-indigo-200 mb-1">
               <span>Progress</span>
-              <span>{skill.progress || 0}% Complete</span>
+              <span>{skill.progressPercentage || 0}% Complete</span>
             </div>
             <div className="h-2 bg-indigo-950 rounded overflow-hidden">
               <div 
