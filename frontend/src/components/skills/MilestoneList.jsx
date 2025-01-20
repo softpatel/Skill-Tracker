@@ -1,124 +1,136 @@
 import React, { useState } from 'react';
+import { ChevronDown, ChevronUp, BookOpen, CheckCircle, Circle } from 'lucide-react';
 import Button from '../common/Button';
 import { api } from '../../services/api';
 
-const MilestoneList = ({ milestones = [] }) => {
-  const [completedMilestones, setCompletedMilestones] = useState(
-    new Set(milestones.filter(m => m.completed).map(m => m._id))
-  );
+const MilestoneList = ({ milestones = [], onMilestoneUpdate }) => {
+  const [expandedMilestones, setExpandedMilestones] = useState(new Set());
+  const [loading, setLoading] = useState(null);
 
-  const handleToggleMilestone = async (milestoneId) => {
-    const isCompleting = !completedMilestones.has(milestoneId);
-    
+  const toggleMilestone = (id) => {
+    setExpandedMilestones(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleToggleCompletion = async (milestone) => {
     try {
-      // Optimistic update
-      setCompletedMilestones(prev => {
-        const next = new Set(prev);
-        if (isCompleting) {
-          next.add(milestoneId);
-        } else {
-          next.delete(milestoneId);
-        }
-        return next;
+      setLoading(milestone._id);
+      await api.skills.updateMilestone(milestone._id, {
+        completed: !milestone.completed
       });
-
-      await api.skills.updateMilestone(milestoneId, { completed: isCompleting });
+      if (onMilestoneUpdate) {
+        onMilestoneUpdate(milestone._id, !milestone.completed);
+      }
     } catch (error) {
       console.error('Failed to update milestone:', error);
-      // Revert optimistic update on error
-      setCompletedMilestones(prev => {
-        const next = new Set(prev);
-        if (isCompleting) {
-          next.delete(milestoneId);
-        } else {
-          next.add(milestoneId);
-        }
-        return next;
-      });
+    } finally {
+      setLoading(null);
     }
   };
 
   if (!milestones.length) {
     return (
       <div className="bg-indigo-800/50 shadow-lg rounded-lg p-6 border border-indigo-700/50">
-        <h3 className="text-xl font-semibold text-white mb-4">Milestones</h3>
-        <p className="text-indigo-200 text-center py-4">No milestones available.</p>
+        <p className="text-indigo-200 text-center">No milestones available yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-indigo-800/50 shadow-lg rounded-lg p-6 border border-indigo-700/50">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-xl font-semibold text-white">Milestones</h3>
-          <p className="text-indigo-300 text-sm mt-1">Track your progress through key achievements</p>
-        </div>
-        <div className="text-indigo-200 text-sm">
-          {completedMilestones.size}/{milestones.length} completed
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {milestones.map((milestone, index) => {
-          const key = milestone._id || `milestone-${index}`;
-          const isCompleted = completedMilestones.has(milestone._id);
-          
-          return (
+    <div className="bg-indigo-800/50 shadow-lg rounded-lg border border-indigo-700/50">
+      <div className="p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Milestones</h3>
+        <div className="space-y-4">
+          {milestones.map((milestone) => (
             <div 
-              key={key}
-              className={`relative flex items-center justify-between p-4 rounded-lg border transition-all ${
-                isCompleted 
-                  ? 'bg-indigo-900/50 border-indigo-500/50' 
-                  : 'bg-indigo-900/30 border-indigo-600/50 hover:border-indigo-500/50'
-              }`}
+              key={milestone._id} 
+              className="bg-indigo-900/30 rounded-lg border border-indigo-600/50"
             >
-              {/* Progress indicator line */}
-              {index < milestones.length - 1 && (
-                <div className={`absolute left-7 bottom-0 w-0.5 h-4 -mb-4 z-0 ${
-                  isCompleted ? 'bg-indigo-500/50' : 'bg-indigo-700/50'
-                }`} />
-              )}
-
-              <div className="flex-1 mr-4">
-                {/* Title and description */}
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-3 h-3 rounded-full ${
-                    isCompleted ? 'bg-indigo-500' : 'bg-indigo-700'
-                  }`} />
-                  <h4 className={`font-medium ${
-                    isCompleted ? 'text-white' : 'text-indigo-200'
-                  }`}>
-                    {milestone.title}
-                  </h4>
-                </div>
-                <p className="text-sm text-indigo-300 ml-6">{milestone.description}</p>
-                
-                {/* Additional info */}
-                <div className="flex items-center mt-2 text-sm text-indigo-400 ml-6">
-                  <span className="mr-4">
-                    <i className="far fa-clock mr-1" />
-                    {milestone.estimatedHours} hours estimated
-                  </span>
-                  {milestone.learningResources?.length > 0 && (
-                    <span>
-                      <i className="far fa-book mr-1" />
-                      {milestone.learningResources.length} resources available
-                    </span>
+              <div className="px-4 py-3 flex items-center justify-between">
+                <button
+                  onClick={() => toggleMilestone(milestone._id)}
+                  className="flex-1 flex items-center gap-3 text-left hover:bg-indigo-800/30 rounded-lg transition-colors pr-4"
+                >
+                  {milestone.completed ? (
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-indigo-400 flex-shrink-0" />
                   )}
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-white truncate">{milestone.title}</h4>
+                    <p className="text-sm text-indigo-300">
+                      {milestone.estimatedHours} hours estimated
+                      {milestone.learningResources?.length > 0 && 
+                        ` • ${milestone.learningResources.length} resources available`}
+                    </p>
+                  </div>
+                  {expandedMilestones.has(milestone._id) ? (
+                    <ChevronUp className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                  )}
+                </button>
+
+                <div className="ml-4 flex-shrink-0">
+                  <Button
+                    variant={milestone.completed ? "secondary" : "primary"}
+                    size="small"
+                    onClick={() => handleToggleCompletion(milestone)}
+                    disabled={loading === milestone._id}
+                  >
+                    {loading === milestone._id ? (
+                      "Updating..."
+                    ) : milestone.completed ? (
+                      "Mark Incomplete"
+                    ) : (
+                      "Mark Complete"
+                    )}
+                  </Button>
                 </div>
               </div>
-
-              <Button
-                variant={isCompleted ? "secondary" : "primary"}
-                size="small"
-                onClick={() => handleToggleMilestone(milestone._id)}
-              >
-                {isCompleted ? 'Completed' : 'Mark Complete'}
-              </Button>
+              
+              {expandedMilestones.has(milestone._id) && (
+                <div className="px-4 pb-4">
+                  <p className="text-indigo-200 mb-4">{milestone.description}</p>
+                  
+                  {milestone.learningResources?.length > 0 && (
+                    <div className="space-y-2">
+                      <h5 className="text-sm font-medium text-indigo-300 flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        Learning Resources
+                      </h5>
+                      <ul className="space-y-2 pl-6">
+                        {milestone.learningResources.map((resource, index) => (
+                          <li key={index} className="text-indigo-200">
+                            {resource.url ? (
+                              <a 
+                                href={resource.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="hover:text-indigo-300 underline"
+                              >
+                                {resource.title}
+                              </a>
+                            ) : (
+                              <span>{resource.title}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -177,8 +177,11 @@ exports.updateProgress = async (req, res) => {
       return res.status(400).json({ error: 'Invalid duration' });
     }
 
-    // First find the skill
-    const skill = await Skill.findOne({ _id: req.params.id, user: req.user._id });
+    // Find the skill and ensure it exists
+    const skill = await Skill.findOne({ 
+      _id: req.params.id, 
+      user: req.user._id 
+    });
     
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
@@ -188,45 +191,53 @@ exports.updateProgress = async (req, res) => {
     const progress = new Progress({
       skill: skill._id,
       user: req.user._id,
-      duration,
-      notes,
+      duration: Number(duration), // Ensure duration is a number
+      notes: notes || '',
       date: date || new Date()
     });
 
     // Save the progress entry
     await progress.save();
 
-    // Check for progress-related achievements
-    const newAchievements = await AchievementService.checkProgressAchievements(req.user._id, skill._id);
-
-    // Update skill with new progress
-    skill.timeSpent = (skill.timeSpent || 0) + duration;
+    // Update skill's time spent
+    const newTimeSpent = (skill.timeSpent || 0) + Number(duration);
+    skill.timeSpent = newTimeSpent;
     
-    // Calculate progress based on time spent vs estimated time
+    // Calculate progress percentage
     const totalEstimatedHours = await Milestone.aggregate([
       { $match: { skill: skill._id } },
       { $group: { _id: null, total: { $sum: '$estimatedHours' } } }
     ]);
     
-    const estimatedTotal = totalEstimatedHours[0]?.total || 100; // fallback to 100 if no milestones
-    skill.progressPercentage = Math.min(Math.round((skill.timeSpent / estimatedTotal) * 100), 100);
-    
-    // Add the progress entry to the history
+    const estimatedTotal = totalEstimatedHours[0]?.total || 100;
+    skill.progressPercentage = Math.min(
+      Math.round((newTimeSpent / estimatedTotal) * 100), 
+      100
+    );
+
+    // Add progress entry to history if not already present
+    if (!skill.progressHistory) {
+      skill.progressHistory = [];
+    }
     skill.progressHistory.push(progress._id);
 
-    // Save the skill updates
+    // Save skill updates
     await skill.save();
 
-    // Return updated skill with the new progress entry
-    const updatedSkill = await Skill.findById(skill._id).populate({
-      path: 'progressHistory',
-      options: { sort: { date: -1 } }
-    });
+    // Return updated skill with populated progress history
+    const updatedSkill = await Skill.findById(skill._id)
+      .populate({
+        path: 'progressHistory',
+        options: { sort: { date: -1 } }
+      });
 
     res.json(updatedSkill);
   } catch (error) {
     console.error('Progress update error:', error);
-    res.status(500).json({ error: 'Error updating progress' });
+    res.status(500).json({ 
+      error: 'Error updating progress',
+      details: error.message 
+    });
   }
 };
 
