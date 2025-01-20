@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
+import ProgressEntryList from '../components/skills/ProgressEntryList';
 import ProgressTracker from '../components/skills/ProgressTracker';
 import MilestoneList from '../components/skills/MilestoneList';
 import Loading from '../components/common/Loading';
@@ -106,6 +107,7 @@ const SkillDetail = () => {
       </div>
 
       <ProgressTracker skillId={skillId} />
+      <ProgressEntryList entries={skill.progressHistory} />
       {skill.milestones && <MilestoneList milestones={skill.milestones} />}
     </div>
   );

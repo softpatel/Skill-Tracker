@@ -123,7 +123,12 @@ exports.getSkill = async (req, res) => {
     const skill = await Skill.findOne({ 
       _id: req.params.id, 
       user: req.user._id 
-    }).populate('milestones');
+    })
+    .populate('milestones')
+    .populate({
+      path: 'progressHistory',
+      options: { sort: { date: -1 } } // Sort by date descending    
+    });
     
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });

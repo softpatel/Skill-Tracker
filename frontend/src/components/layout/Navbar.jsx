@@ -17,16 +17,13 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="font-bold text-xl text-white hover:text-indigo-200 transition-colors">
-            SkillTracker
+            Skill Tracker
           </Link>
           <div className="flex items-center gap-6">
             {user ? (
               <>
                 <Link to="/dashboard" className="text-indigo-200 hover:text-white transition-colors">
                   Dashboard
-                </Link>
-                <Link to="/create-skill" className="text-indigo-200 hover:text-white transition-colors">
-                  Add Skill
                 </Link>
                 <Link to="/profile" className="text-indigo-200 hover:text-white transition-colors">
                   Profile
