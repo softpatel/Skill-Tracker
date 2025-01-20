@@ -13,6 +13,16 @@ const Dashboard = () => {
     refreshSkills();
   }, [refreshSkills]);
 
+  // Combine progress history from all skills
+  const allProgressHistory = skills.flatMap(skill => 
+    skill.progressHistory || []
+  );
+
+  // Combine milestones from all skills
+  const allMilestones = skills.flatMap(skill => 
+    skill.milestones || []
+  );
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -58,11 +68,10 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {skills.length > 0 && (
+          {allProgressHistory.length > 0 && (
             <ProgressChart 
-              timeEntries={skills.flatMap(skill => 
-                skill.timeEntries || []
-              )}
+              progressHistory={allProgressHistory}
+              milestones={allMilestones}
             />
           )}
         </>

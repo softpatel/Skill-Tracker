@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-const ProgressChart = ({ timeEntries = [], milestones = [] }) => {
+const ProgressChart = ({ progressHistory = [], milestones = [] }) => {
   const chartData = useMemo(() => {
+    // First, create a map of milestone completions by date
     const milestoneCompletions = new Map(
       milestones
         .filter(m => m.completed)
@@ -12,22 +13,26 @@ const ProgressChart = ({ timeEntries = [], milestones = [] }) => {
         ])
     );
 
-    return timeEntries
-      .reduce((acc, entry) => {
-        const date = new Date(entry.date).toISOString().split('T')[0];
-        if (!acc[date]) {
-          acc[date] = {
-            date,
-            timeSpent: 0,
-            milestone: milestoneCompletions.get(date)
-          };
-        }
-        acc[date].timeSpent += entry.duration;
-        return acc;
-      }, {});
-  }, [timeEntries, milestones]);
+    // Convert progress entries into daily aggregates
+    const aggregatedData = progressHistory.reduce((acc, entry) => {
+      const date = new Date(entry.date).toISOString().split('T')[0];
+      if (!acc[date]) {
+        acc[date] = {
+          date,
+          timeSpent: 0,
+          milestone: milestoneCompletions.get(date)
+        };
+      }
+      acc[date].timeSpent += entry.duration;
+      return acc;
+    }, {});
 
-  if (!timeEntries.length) {
+    // Convert to array and sort by date
+    return Object.values(aggregatedData)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [progressHistory, milestones]);
+
+  if (!progressHistory.length) {
     return (
       <div className="bg-indigo-800/50 shadow-lg rounded-lg p-6 border border-indigo-700/50">
         <h3 className="text-xl font-semibold mb-4 text-white">Progress Over Time</h3>
@@ -43,7 +48,7 @@ const ProgressChart = ({ timeEntries = [], milestones = [] }) => {
       <h3 className="text-xl font-semibold mb-4 text-white">Progress Over Time</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={Object.values(chartData)}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#4338ca" opacity={0.2} />
             <XAxis 
               dataKey="date" 

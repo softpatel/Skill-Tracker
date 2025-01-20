@@ -111,7 +111,12 @@ exports.createSkill = async (req, res) => {
 
 exports.getAllSkills = async (req, res) => {
   try {
-    const skills = await Skill.find({ user: req.user._id });
+    const skills = await Skill.find({ user: req.user._id })
+      .populate({
+        path: 'progressHistory',
+        options: { sort: { date: -1 } }
+      })
+      .populate('milestones');
     res.json(skills);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching skills' });
