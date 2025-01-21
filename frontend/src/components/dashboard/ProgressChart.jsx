@@ -64,7 +64,8 @@ const ProgressChart = ({ progressHistory = [], milestones = [] }) => {
               label={{ 
                 value: 'Time Spent (hours)', 
                 angle: -90, 
-                position: 'insideLeft',
+                offset: 25,
+                position: 'insideBottomLeft',
                 style: { fill: '#c7d2fe' }
               }}
             />

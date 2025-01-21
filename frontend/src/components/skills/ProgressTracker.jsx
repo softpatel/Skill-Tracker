@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSkills } from '../../contexts/SkillContext';
 import Button from '../common/Button';
 
-const ProgressTracker = ({ skillId }) => {
+const ProgressTracker = ({ skillId, onProgressUpdate }) => {
   const { updateSkillProgress } = useSkills();
   const [isLogging, setIsLogging] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,11 +23,17 @@ const ProgressTracker = ({ skillId }) => {
         throw new Error('Please enter a valid duration');
       }
 
-      await updateSkillProgress(skillId, {
+      // Get the updated skill data from the API
+      const updatedSkill = await updateSkillProgress(skillId, {
         date: new Date().toISOString(),
         duration: duration,
         notes: progressData.notes || ''
       });
+
+      // Call the onProgressUpdate callback with the updated skill data
+      if (onProgressUpdate) {
+        onProgressUpdate(updatedSkill);
+      }
 
       setProgressData({ duration: '', notes: '' });
       setIsLogging(false);

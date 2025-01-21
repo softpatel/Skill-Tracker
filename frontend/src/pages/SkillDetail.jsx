@@ -91,7 +91,7 @@ const SkillDetail = () => {
             <div className="h-2 bg-indigo-950 rounded overflow-hidden">
               <div 
                 className="h-full bg-indigo-500 rounded transition-all duration-500" 
-                style={{ width: `${skill.progress || 0}%` }}
+                style={{ width: `${skill.progressPercentage || 0}%` }}
               />
             </div>
           </div>
@@ -106,9 +106,41 @@ const SkillDetail = () => {
         </div>
       </div>
 
-      <ProgressTracker skillId={skillId} />
-      <ProgressEntryList entries={skill.progressHistory} />
-      {skill.milestones && <MilestoneList milestones={skill.milestones} />}
+      <ProgressTracker 
+        skillId={skillId}
+        onProgressUpdate={(updatedSkill) => {
+          setSkill(updatedSkill);
+        }}
+      />
+      <ProgressEntryList entries={skill.progressHistory || []} />
+      {skill.milestones && (
+        <MilestoneList 
+          milestones={skill.milestones}
+          onMilestoneUpdate={(milestoneId, completed) => {
+            setSkill(prevSkill => {
+              // Update the milestone completion status
+              const updatedMilestones = prevSkill.milestones.map(milestone =>
+                milestone._id === milestoneId
+                  ? { ...milestone, completed }
+                  : milestone
+              );
+              
+              // Calculate new progress percentage
+              const totalMilestones = updatedMilestones.length;
+              const completedMilestones = updatedMilestones.filter(m => m.completed).length;
+              const newProgressPercentage = Math.round((completedMilestones / totalMilestones) * 100);
+              
+              // Return updated skill state
+              return {
+                ...prevSkill,
+                milestones: updatedMilestones,
+                progressPercentage: newProgressPercentage,
+                status: newProgressPercentage === 100 ? 'completed' : 'in-progress'
+              };
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

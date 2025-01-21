@@ -106,7 +106,7 @@ const SkillCard = ({ skill }) => {
             <span className="font-medium text-white">{skill.timeSpent || 0}</span> hours invested
           </div>
           <div className="text-indigo-200">
-            <span className="font-medium text-white">{skill.progress || 0}%</span> complete
+            <span className="font-medium text-white">{skill.progressPercentage || 0}%</span> complete
           </div>
         </div>
 

@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, BookOpen, CheckCircle, Circle } from 'lucide-re
 import Button from '../common/Button';
 import { api } from '../../services/api';
 
-const MilestoneList = ({ milestones = [], onMilestoneUpdate }) => {
+const MilestoneList = ({ milestones = [], onMilestoneUpdate = () => {} }) => {
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
   const [loading, setLoading] = useState(null);
 
@@ -32,6 +32,11 @@ const MilestoneList = ({ milestones = [], onMilestoneUpdate }) => {
       console.error('Failed to update milestone:', error);
     } finally {
       setLoading(null);
+      
+      // Call onMilestoneUpdate after successful API call
+      if (onMilestoneUpdate) {
+        onMilestoneUpdate(milestone._id, !milestone.completed);
+      }
     }
   };
 
