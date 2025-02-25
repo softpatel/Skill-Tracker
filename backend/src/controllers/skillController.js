@@ -9,6 +9,15 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const populateSkillData = (query) => {
+  return query
+    .populate({
+      path: 'progressHistory',
+      options: { sort: { date: -1 } } // Sort progress entries by date descending
+    })
+    .populate('milestones');
+};
+
 exports.generatePlan = async (req, res) => {
   try {
     const { title, description, currentLevel, targetLevel, timeCommitment } = req.body;
@@ -99,9 +108,7 @@ exports.createSkill = async (req, res) => {
     }
     
     // Fetch the complete skill with populated milestones
-    const populatedSkill = await Skill.findById(skill._id)
-      .populate('milestones')
-      .exec();
+    const populatedSkill = await populateSkillData(Skill.findById(skill._id));
 
     res.status(201).json(populatedSkill);
   } catch (error) {
@@ -111,12 +118,7 @@ exports.createSkill = async (req, res) => {
 
 exports.getAllSkills = async (req, res) => {
   try {
-    const skills = await Skill.find({ user: req.user._id })
-      .populate({
-        path: 'progressHistory',
-        options: { sort: { date: -1 } }
-      })
-      .populate('milestones');
+    const skills = await populateSkillData(Skill.find({ user: req.user._id }));
     res.json(skills);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching skills' });
@@ -125,15 +127,10 @@ exports.getAllSkills = async (req, res) => {
 
 exports.getSkill = async (req, res) => {
   try {
-    const skill = await Skill.findOne({ 
+    const skill = await populateSkillData(Skill.findOne({ 
       _id: req.params.id, 
       user: req.user._id 
-    })
-    .populate('milestones')
-    .populate({
-      path: 'progressHistory',
-      options: { sort: { date: -1 } } // Sort by date descending    
-    });
+    }));
     
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
@@ -147,10 +144,10 @@ exports.getSkill = async (req, res) => {
 exports.deleteSkill = async (req, res) => {
   try {
     // Find the skill and ensure it belongs to the user
-    const skill = await Skill.findOne({ 
+    const skill = await populateSkillData(Skill.findOne({ 
       _id: req.params.id, 
       user: req.user._id 
-    });
+    }));
 
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
@@ -178,10 +175,10 @@ exports.updateProgress = async (req, res) => {
     }
 
     // Find the skill and ensure it exists
-    const skill = await Skill.findOne({ 
+    const skill = await populateSkillData(Skill.findOne({ 
       _id: req.params.id, 
       user: req.user._id 
-    });
+    }));
     
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
@@ -208,12 +205,6 @@ exports.updateProgress = async (req, res) => {
       { $match: { skill: skill._id } },
       { $group: { _id: null, total: { $sum: '$estimatedHours' } } }
     ]);
-    
-    const estimatedTotal = totalEstimatedHours[0]?.total || 100;
-    skill.progressPercentage = Math.min(
-      Math.round((newTimeSpent / estimatedTotal) * 100), 
-      100
-    );
 
     // Add progress entry to history if not already present
     if (!skill.progressHistory) {
@@ -225,11 +216,7 @@ exports.updateProgress = async (req, res) => {
     await skill.save();
 
     // Return updated skill with populated progress history
-    const updatedSkill = await Skill.findById(skill._id)
-      .populate({
-        path: 'progressHistory',
-        options: { sort: { date: -1 } }
-      });
+    const updatedSkill = await populateSkillData(Skill.findById(skill._id));
 
     res.json(updatedSkill);
   } catch (error) {
@@ -271,12 +258,12 @@ exports.updateMilestone = async (req, res) => {
     // If milestone is marked as completed, check if all milestones are completed
     // and update the skill progress accordingly
     if (updates.completed !== undefined) {
-      const skill = await Skill.findById(milestone.skill._id);
+      const skill = await populateSkillData(Skill.findById(milestone.skill._id));
       const allMilestones = await Milestone.find({ skill: skill._id });
       const completedCount = allMilestones.filter(m => m.completed).length;
       const progress = Math.round((completedCount / allMilestones.length) * 100);
       
-      skill.progress = progress;
+      skill.progressPercentage = progress;
       if (progress === 100) {
         skill.status = 'completed';
       }
