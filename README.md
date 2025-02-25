@@ -62,7 +62,27 @@ JWT_SECRET=your_jwt_secret
 ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
-5. Start the development servers:
+5. Start MongoDB (required before starting the backend):
+
+   **macOS**:
+   ```bash
+   brew services start mongodb-community
+   ```
+
+   **Windows**:
+   ```bash
+   net start MongoDB
+   ```
+
+   **Linux**:
+   ```bash
+   sudo systemctl start mongod
+   ```
+
+   **Using MongoDB Atlas**:
+   If you're using MongoDB Atlas, ensure your IP address is whitelisted in the Atlas dashboard.
+
+6. Start the development servers:
 
 Backend:
 ```bash
@@ -97,6 +117,17 @@ Skill-Tracker/
     │   └── middleware/  # Custom middleware
 ```
 
+## Troubleshooting
+
+### MongoDB Connection Issues
+- Ensure MongoDB is running before starting the backend server
+- Verify your MongoDB connection string in the `.env` file
+- For local MongoDB, check status with: `brew services list` (macOS), `service mongod status` (Linux), or Service Manager (Windows)
+
+### API Key Issues
+- Make sure your Anthropic API key is valid and has proper permissions
+- Check that all environment variables are correctly set in your `.env` file
+
 ## Contributing
 
 1. Fork the repository
@@ -107,4 +138,4 @@ Skill-Tracker/
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details
